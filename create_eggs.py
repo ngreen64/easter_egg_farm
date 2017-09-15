@@ -6,21 +6,11 @@ import uuid
 
 if len(sys.argv) < 1:
     print("No arguments passed to script, generating infinite eggs between 1 and 100,000,000")
-#    sys.exit()
-
-#if len(sys.argv) < 2:
-#   print("Usage: script.py <lifetime> <upperlimitforprime>")
-#   sys.exit()
-
-if sys.argv[1]:
-    lifetime = int(sys.argv[1])
-else:
     lifetime = -1
-    
-if sys.argv[2]:
-    upperlimit = int(sys.argv[2])
-else:
     upperlimit = 100000000
+else:
+    lifetime = int(sys.argv[1])
+    upperlimit = int(sys.argv[2])
     
 eggname = uuid.uuid4()
 
