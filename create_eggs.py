@@ -7,7 +7,7 @@ import uuid
 if len(sys.argv) < 2:
     print("No arguments passed to script, generating infinite eggs between 1 and 100,000,000,000")
     lifetime = -1
-    upperlimit = 10000000000
+    upperlimit = 99999999999
 else:
     lifetime = int(sys.argv[1])
     upperlimit = int(sys.argv[2])
