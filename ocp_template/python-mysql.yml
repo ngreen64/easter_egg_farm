@@ -12,8 +12,7 @@ metadata:
     openshift.io/display-name: Python + MySQL (Persistent)
     tags: quickstart,python,mysql
     template.openshift.io/documentation-url: https://github.com/ngreen64/easter_egg_farm
-    template.openshift.io/long-description: This template ties together a Python script and a MySQL DB with the 
-    capability to select the python script to insert into the DB
+    template.openshift.io/long-description: This template ties together a Python script and a MySQL DB with the capability to select the python script to insert into the DB
     template.openshift.io/provider-display-name: ACME inc
     template.openshift.io/support-url: https://www.example.com
   creationTimestamp: null
