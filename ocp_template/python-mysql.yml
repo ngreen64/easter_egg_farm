@@ -136,7 +136,7 @@ objects:
             exec:
               command:
               - cat
-              - /etc/release
+              - /etc/hostname
             initialDelaySeconds: 15
             timeoutSeconds: 1
           name: python-mysql-persistent
@@ -146,7 +146,7 @@ objects:
             exec:
               command:
               - cat
-              - /etc/release
+              - /etc/hostname
             initialDelaySeconds: 15
             timeoutSeconds: 1
           resources:
