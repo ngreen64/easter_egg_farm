@@ -141,7 +141,7 @@ objects:
             timeoutSeconds: 1
           name: python-mysql-persistent
           ports:
-          - containerPort: 8080
+          - containerPort: 22
           readinessProbe:
             exec:
               command:
