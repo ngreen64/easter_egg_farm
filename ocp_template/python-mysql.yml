@@ -11,14 +11,13 @@ metadata:
     iconClass: icon-python
     openshift.io/display-name: Python + MySQL (Persistent)
     tags: quickstart,python,mysql
-    template.openshift.io/documentation-url: https://github.com/openshift/django-ex
-    template.openshift.io/long-description: This template defines resources needed
-      to develop a Django based application, including a build configuration, application
-      deployment configuration, and database deployment configuration.
-    template.openshift.io/provider-display-name: Red Hat, Inc.
-    template.openshift.io/support-url: https://access.redhat.com
+    template.openshift.io/documentation-url: https://github.com/ngreen64/easter_egg_farm
+    template.openshift.io/long-description: This template ties together a Python script and a MySQL DB with the 
+    capability to select the python script to insert into the DB
+    template.openshift.io/provider-display-name: ACME inc
+    template.openshift.io/support-url: https://www.example.com
   creationTimestamp: null
-  name: django-psql-persistent
+  name: python-mysql-persistent
 objects:
 - apiVersion: v1
   kind: Secret
@@ -72,8 +71,8 @@ objects:
       to:
         kind: ImageStreamTag
         name: ${NAME}:latest
-    postCommit:
-      script: ./manage.py test
+#    postCommit:
+#      script: ./manage.py test
     source:
       contextDir: ${CONTEXT_DIR}
       git:
@@ -104,7 +103,7 @@ objects:
       template.alpha.openshift.io/wait-for-ready: "true"
     name: ${NAME}
   spec:
-    replicas: 1
+    replicas: 2
     selector:
       name: ${NAME}
     strategy:
@@ -120,7 +119,7 @@ objects:
           - name: DATABASE_SERVICE_NAME
             value: ${DATABASE_SERVICE_NAME}
           - name: DATABASE_ENGINE
-            value: ${DATABASE_ENGINE}
+            value: mysql
           - name: DATABASE_NAME
             value: ${DATABASE_NAME}
           - name: DATABASE_USER
@@ -133,13 +132,6 @@ objects:
               secretKeyRef:
                 key: database-password
                 name: ${NAME}
-          - name: APP_CONFIG
-            value: ${APP_CONFIG}
-          - name: DJANGO_SECRET_KEY
-            valueFrom:
-              secretKeyRef:
-                key: django-secret-key
-                name: ${NAME}
           image: ' '
           livenessProbe:
             httpGet:
@@ -147,7 +139,7 @@ objects:
               port: 8080
             initialDelaySeconds: 30
             timeoutSeconds: 3
-          name: django-psql-persistent
+          name: python-mysql-persistent
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -163,7 +155,7 @@ objects:
     - imageChangeParams:
         automatic: true
         containerNames:
-        - django-psql-persistent
+        - python-mysql-persistent
         from:
           kind: ImageStreamTag
           name: ${NAME}:latest
@@ -187,9 +179,9 @@ objects:
     name: ${DATABASE_SERVICE_NAME}
   spec:
     ports:
-    - name: postgresql
-      port: 5432
-      targetPort: 5432
+    - name: mysql
+      port: 3306
+      targetPort: 3306
     selector:
       name: ${DATABASE_SERVICE_NAME}
 - apiVersion: v1
@@ -212,17 +204,17 @@ objects:
       spec:
         containers:
         - env:
-          - name: POSTGRESQL_USER
+          - name: MYSQL_USER
             valueFrom:
               secretKeyRef:
                 key: database-user
                 name: ${NAME}
-          - name: POSTGRESQL_PASSWORD
+          - name: MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
                 key: database-password
                 name: ${NAME}
-          - name: POSTGRESQL_DATABASE
+          - name: MYSQL_DATABASE
             value: ${DATABASE_NAME}
           image: ' '
           livenessProbe:
@@ -230,24 +222,24 @@ objects:
             tcpSocket:
               port: 5432
             timeoutSeconds: 1
-          name: postgresql
+          name: MYSQL
           ports:
-          - containerPort: 5432
+          - containerPort: 3306
           readinessProbe:
             exec:
               command:
               - /bin/sh
               - -i
               - -c
-              - psql -h 127.0.0.1 -U ${POSTGRESQL_USER} -q -d ${POSTGRESQL_DATABASE}
-                -c 'SELECT 1'
+              - MYSQL_PWD="$MYSQL_PASSWORD" mysql -h 127.0.0.1 -u $MYSQL_USER -D $MYSQL_DATABASE
+                -e 'SELECT 1'
             initialDelaySeconds: 5
             timeoutSeconds: 1
           resources:
             limits:
-              memory: ${MEMORY_POSTGRESQL_LIMIT}
+              memory: ${MEMORY_MYSQL_LIMIT}
           volumeMounts:
-          - mountPath: /var/lib/pgsql/data
+          - mountPath: /var/lib/mysql/data
             name: ${DATABASE_SERVICE_NAME}-data
         volumes:
         - name: ${DATABASE_SERVICE_NAME}-data
@@ -257,10 +249,10 @@ objects:
     - imageChangeParams:
         automatic: true
         containerNames:
-        - postgresql
+        - mysql
         from:
           kind: ImageStreamTag
-          name: postgresql:9.5
+          name: mysql:latest
           namespace: ${NAMESPACE}
       type: ImageChange
     - type: ConfigChange
@@ -269,20 +261,20 @@ parameters:
   displayName: Name
   name: NAME
   required: true
-  value: django-psql-persistent
+  value: python-mysql-persistent
 - description: The OpenShift Namespace where the ImageStream resides.
   displayName: Namespace
   name: NAMESPACE
   required: true
   value: openshift
-- description: Maximum amount of memory the Django container can use.
+- description: Maximum amount of memory the Python container can use.
   displayName: Memory Limit
   name: MEMORY_LIMIT
   required: true
   value: 512Mi
-- description: Maximum amount of memory the PostgreSQL container can use.
-  displayName: Memory Limit (PostgreSQL)
-  name: MEMORY_POSTGRESQL_LIMIT
+- description: Maximum amount of memory the MySQL container can use.
+  displayName: Memory Limit (MySQL)
+  name: MEMORY_MYSQL_LIMIT
   required: true
   value: 512Mi
 - description: Volume space available for data, e.g. 512Mi, 2Gi
@@ -294,7 +286,7 @@ parameters:
   displayName: Git Repository URL
   name: SOURCE_REPOSITORY_URL
   required: true
-  value: https://github.com/openshift/django-ex.git
+  value: https://github.com/ngreen64/easter_egg_farm
 - description: Set this to a branch name, tag or other ref of your repository if you
     are not using the default branch.
   displayName: Git Reference
@@ -303,7 +295,7 @@ parameters:
     of your repository.
   displayName: Context Directory
   name: CONTEXT_DIR
-- description: The exposed hostname that will route to the Django service, if left
+- description: The exposed hostname that will route to the Python service, if left
     blank a value will be defaulted.
   displayName: Application Hostname
   name: APPLICATION_DOMAIN
@@ -316,12 +308,7 @@ parameters:
 - displayName: Database Service Name
   name: DATABASE_SERVICE_NAME
   required: true
-  value: postgresql
-- description: 'Database engine: postgresql, mysql or sqlite (default).'
-  displayName: Database Engine
-  name: DATABASE_ENGINE
-  required: true
-  value: postgresql
+  value: mysql-backend
 - displayName: Database Name
   name: DATABASE_NAME
   required: true
@@ -329,19 +316,8 @@ parameters:
 - displayName: Database Username
   name: DATABASE_USER
   required: true
-  value: django
+  value: mysql
 - displayName: Database User Password
   from: '[a-zA-Z0-9]{16}'
   generate: expression
   name: DATABASE_PASSWORD
-- description: Relative path to Gunicorn configuration file (optional).
-  displayName: Application Configuration File Path
-  name: APP_CONFIG
-- description: Set this to a long random string.
-  displayName: Django Secret Key
-  from: '[\w]{50}'
-  generate: expression
-  name: DJANGO_SECRET_KEY
-- description: The custom PyPi index URL
-  displayName: Custom PyPi Index URL
-  name: PIP_INDEX_URL
