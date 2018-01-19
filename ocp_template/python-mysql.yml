@@ -221,7 +221,7 @@ objects:
             tcpSocket:
               port: 5432
             timeoutSeconds: 1
-          name: MYSQL
+          name: mysql
           ports:
           - containerPort: 3306
           readinessProbe:
