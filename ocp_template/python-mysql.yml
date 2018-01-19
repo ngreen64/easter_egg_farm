@@ -36,9 +36,9 @@ objects:
     name: ${NAME}
   spec:
     ports:
-    - name: web
-      port: 8080
-      targetPort: 8080
+    - name: ssh
+      port: 22
+      targetPort: 22
     selector:
       name: ${NAME}
 - apiVersion: v1
@@ -133,20 +133,22 @@ objects:
                 name: ${NAME}
           image: ' '
           livenessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 30
-            timeoutSeconds: 3
+            exec:
+              command:
+              - cat
+              - /etc/release
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
           name: python-mysql-persistent
           ports:
           - containerPort: 8080
           readinessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 3
-            timeoutSeconds: 3
+            exec:
+              command:
+              - cat
+              - /etc/release
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
           resources:
             limits:
               memory: ${MEMORY_LIMIT}
