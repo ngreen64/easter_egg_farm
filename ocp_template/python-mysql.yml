@@ -25,7 +25,7 @@ objects:
   stringData:
     database-password: ${DATABASE_PASSWORD}
     database-user: ${DATABASE_USER}
-    django-secret-key: ${DJANGO_SECRET_KEY}
+    database-name: ${DATABASE_NAME}
 - apiVersion: v1
   kind: Service
   metadata:
@@ -135,18 +135,16 @@ objects:
           livenessProbe:
             exec:
               command:
-              - cat
-              - /etc/hostname
+              - hostname
             initialDelaySeconds: 15
             timeoutSeconds: 1
           name: python-mysql-persistent
           ports:
-          - containerPort: 22
+          - containerPort: 8080
           readinessProbe:
             exec:
               command:
-              - cat
-              - /etc/hostname
+              - hostname
             initialDelaySeconds: 15
             timeoutSeconds: 1
           resources:
@@ -221,7 +219,7 @@ objects:
           livenessProbe:
             initialDelaySeconds: 30
             tcpSocket:
-              port: 5432
+              port: 3306
             timeoutSeconds: 1
           name: mysql
           ports:
